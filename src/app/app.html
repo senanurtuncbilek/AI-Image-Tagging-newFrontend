@@ -1,17 +1,43 @@
 <div class="container">
   <h1>AI Image Tagger</h1>
-  
+
+  <div class="input-group">
+    <label for="token">API Access Token:</label>
+    <input 
+      type="password" 
+      id="token" 
+      [(ngModel)]="userToken" 
+      placeholder="Tokenınızı buraya yazın..."
+      class="token-input"
+    >
+    <small *ngIf="!userToken" style="color: #ffc107;">* Analiz için token gereklidir.</small>
+  </div>
+
   <div class="card">
     <h3>Görüntü Analizi</h3>
     <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
     
-    <button (click)="onUpload()" [disabled]="!selectedFile" class="upload-btn">
+    <button (click)="onUpload()" [disabled]="!selectedFile || !userToken" class="upload-btn">
       Analiz Et
     </button>
   </div>
-@if (result) {
-  <div class="result-box">
-    <pre>{{ result | json }}</pre>
-  </div>
-}
+
+  @if (result) {
+    <div class="result-box">
+      <h4>Tespit Edilen Nesneler:</h4>
+      <ul>
+        <li *ngFor="let item of result.object_counts | keyvalue">
+          <strong>{{ item.key }}:</strong> {{ item.value }} adet
+        </li>
+      </ul>
+      <hr>
+      <p><strong>Keywords:</strong> {{ result.keywords.join(', ') }}</p>
+      <p><strong>İşlem Süresi:</strong> {{ result.processing_time }} sn</p>
+      
+      <details>
+        <summary>Ham Veriyi Gör (JSON)</summary>
+        <pre>{{ result | json }}</pre>
+      </details>
+    </div>
+  }
 </div>
