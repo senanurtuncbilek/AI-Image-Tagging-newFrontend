@@ -1,0 +1,6 @@
+.container { text-align: center; padding: 50px; font-family: 'Segoe UI', sans-serif; }
+.card { border: 2px solid #ddd; padding: 30px; border-radius: 12px; background: #fafafa; display: inline-block; }
+.file-input { margin-bottom: 20px; display: block; }
+.upload-btn { background-color: #007bff; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; }
+.upload-btn:disabled { background-color: #ccc; }
+.result-box { margin-top: 30px; text-align: left; background: #eee; padding: 15px; border-radius: 8px; max-width: 600px; margin-inline: auto; }
