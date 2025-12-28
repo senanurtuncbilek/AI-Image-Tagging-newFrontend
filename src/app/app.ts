@@ -13,50 +13,64 @@ import { FormsModule } from '@angular/forms';
 export class AppComponent {
   selectedFile: File | null = null;
   result: any = null;
+  userToken: string = ''; // Node.js'den gelen JWT
+  isLoggedIn: boolean = false; 
+  loginData = { username: '', password: '' }; 
 
-
-  //private readonly TOKEN = '1234567890987654321';
-
-  userToken: string = '';
-  
   constructor(private http: HttpClient) {}
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
   }
 
+  // Giriş Yap ve Proxy'den JWT Al
+  onLogin() {
+    this.http.post('http://localhost:3000/api/auth/login', this.loginData).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.userToken = res.token; 
+          this.isLoggedIn = true;
+          alert('Giriş başarılı! Analiz paneli açıldı.');
+        }
+      },
+      error: (err) => {
+        console.error('Login Hatası:', err);
+        alert('Kullanıcı adı veya şifre hatalı!');
+      }
+    });
+  }
+
+  // JWT ile Proxy Üzerinden Analiz İsteği At
   onUpload() {
     if (!this.selectedFile) {
       alert("Lütfen bir dosya seçin!");
-      return;
-    }
-    
-    if (!this.userToken) {
-      alert("Lütfen bir API Token girin!");
       return;
     }
 
     const formData = new FormData();
     formData.append('image', this.selectedFile);
 
-    
+    //Token'ı header'a ekliyoruz
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.userToken}`
     });
 
-    this.http.post('http://localhost:5000/process', formData, { headers }).subscribe({
+    this.http.post('http://localhost:3000/api/analyze', formData, { headers }).subscribe({
       next: (res) => {
         this.result = res;
-        console.log('Güvenli Python bağlantısı başarılı!');
+        console.log('Analiz verisi başarıyla alındı!');
       },
       error: (err) => {
-        console.error('Bağlantı Hatası:', err);
-        if (err.status === 401) {
-          alert('Yetkisiz Erişim: Token hatalı veya eksik!');
-        } else {
-          alert('Python sunucusuna ulaşılamadı! Port 5000 açık mı?');
-        }
+        console.error('Analiz Hatası:', err);
+        alert('Oturum süresi dolmuş veya yetkisiz erişim!');
       }
     });
+  }
+
+  logout() {
+    this.isLoggedIn = false;
+    this.userToken = '';
+    this.result = null;
+    this.loginData = { username: '', password: '' };
   }
 }
