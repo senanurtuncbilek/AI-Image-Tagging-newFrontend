@@ -1,43 +1,48 @@
 <div class="container">
   <h1>AI Image Tagger</h1>
 
-  <div class="input-group">
-    <label for="token">API Access Token:</label>
-    <input 
-      type="password" 
-      id="token" 
-      [(ngModel)]="userToken" 
-      placeholder="Tokenınızı buraya yazın..."
-      class="token-input"
-    >
-    <small *ngIf="!userToken" style="color: #ffc107;">* Analiz için token gereklidir.</small>
+  <div class="card" *ngIf="!isLoggedIn">
+    <h3>Yönetici Girişi <hr></h3>
+    <div class="input-group">
+      <input type="text" [(ngModel)]="loginData.username" placeholder="Kullanıcı Adı" class="token-input">
+      <hr>
+      <input type="password" [(ngModel)]="loginData.password" placeholder="Şifre" class="token-input">
+    </div>
+    <hr>
+    <button (click)="onLogin()" class="upload-btn">Giriş Yap</button>
   </div>
 
-  <div class="card">
-    <h3>Görüntü Analizi</h3>
-    <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
-    
-    <button (click)="onUpload()" [disabled]="!selectedFile || !userToken" class="upload-btn">
-      Analiz Et
-    </button>
-  </div>
+  <div *ngIf="isLoggedIn">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <span>Hoş geldin, <strong>{{ loginData.username }}</strong></span>
+        <hr>
+        <button (click)="logout()" class="logout-btn" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">Çıkış Yap</button>
+      </div>
+      
+      <h3>Görüntü Analizi</h3>
+      <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
+      
+      <button (click)="onUpload()" [disabled]="!selectedFile" class="upload-btn">
+        Analiz Et
+      </button>
+    </div>
 
-  @if (result) {
-    <div class="result-box">
+    <div class="result-box" *ngIf="result">
       <h4>Tespit Edilen Nesneler:</h4>
       <ul>
-        <li *ngFor="let item of result.object_counts | keyvalue">
+        <li *ngFor="let item of result.analysis?.object_counts | keyvalue">
           <strong>{{ item.key }}:</strong> {{ item.value }} adet
         </li>
       </ul>
       <hr>
-      <p><strong>Keywords:</strong> {{ result.keywords.join(', ') }}</p>
-      <p><strong>İşlem Süresi:</strong> {{ result.processing_time }} sn</p>
+      <p><strong>Keywords:</strong> {{ result.analysis?.keywords?.join(', ') }}</p>
+      <p><strong>İşlem Süresi:</strong> {{ result.processing_time_ms }} ms</p>
       
       <details>
         <summary>Ham Veriyi Gör (JSON)</summary>
         <pre>{{ result | json }}</pre>
       </details>
     </div>
-  }
+  </div>
 </div>
